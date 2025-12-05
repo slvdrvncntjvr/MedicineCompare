@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install build dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # Copy client package and install
 COPY client/package*.json ./client/
@@ -48,9 +48,9 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
-# Copy package files and install production dependencies
+# Copy package files and install production dependencies only
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev --ignore-scripts
 
 # Rebuild better-sqlite3 for this platform
 RUN npm rebuild better-sqlite3
@@ -71,4 +71,3 @@ ENV PORT=3001
 EXPOSE 3001
 
 CMD ["node", "server/index.js"]
-

@@ -7,10 +7,14 @@ const PORT = process.env.PORT || 3001;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Middleware
-app.use(cors({
-  origin: isProduction ? false : ['http://localhost:5173', 'http://127.0.0.1:5173'],
-  credentials: true
-}));
+// In production, frontend is served from same origin, so CORS is not needed
+// In development, allow requests from Vite dev server
+if (!isProduction) {
+  app.use(cors({
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    credentials: true
+  }));
+}
 app.use(express.json());
 
 // Request logging
