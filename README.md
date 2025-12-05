@@ -2,243 +2,233 @@
 
 A real-time competitor price monitoring system for pharmaceutical products. Track competitor pricing, receive alerts on price changes, and get actionable recommendations.
 
-![Price Intelligence Dashboard](https://img.shields.io/badge/Status-Production%20Ready-green)
-![Node.js](https://img.shields.io/badge/Node.js-18+-blue)
+![Node.js](https://img.shields.io/badge/Node.js-18+-green)
 ![React](https://img.shields.io/badge/React-18-blue)
+![SQLite](https://img.shields.io/badge/SQLite-3-orange)
 
 ## ✨ Features
 
-### 📊 Dashboard
-- **Price Comparison Table** - Side-by-side comparison with status indicators
-- **30-Day Price Chart** - Visual trend analysis using Recharts
-- **Market Position Card** - See how your prices compare to market average
-- **Real-time Alerts** - Get notified when prices change beyond threshold
-- **Smart Suggestions** - AI-generated recommendations for pricing strategy
+- **🔍 Automated Scraping** - Stealth mode with anti-detection
+- **📝 Manual Price Entry** - Fallback when scraping fails
+- **📊 Price Comparison** - Side-by-side competitor analysis
+- **📈 30-Day Charts** - Visual price trend tracking
+- **🔔 Smart Alerts** - Notifications when prices change
+- **💡 AI Suggestions** - Pricing recommendations
 
-### ⚙️ Configuration
-- Add/Edit/Delete competitor tracking
-- Customizable CSS selectors for price scraping
-- Configurable alert thresholds per competitor
-- Product category mapping
+## 🚀 Quick Start (Local)
 
-### 🔄 Scraping Engine
-- Puppeteer-based web scraping
-- Mock scraping mode for demo
-- Automatic alert generation
-- Error handling and logging
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18 or higher
-- npm or yarn
-
-### Installation
-
-1. **Clone the repository**
 ```bash
-cd MedicineCompare
-```
-
-2. **Install dependencies**
-```bash
+# Install dependencies
 npm run install:all
-```
 
-This will install both server and client dependencies.
-
-3. **Start the development servers**
-```bash
+# Start development servers
 npm run dev
+
+# Open http://localhost:5173
 ```
 
-This starts:
-- Backend server at `http://localhost:3001`
-- Frontend dev server at `http://localhost:5173`
+## 📦 Deployment Options
 
-4. **Open your browser**
-Navigate to `http://localhost:5173`
+### Option 1: Railway (Recommended) ⭐
+
+Railway is the easiest option - supports SQLite, Puppeteer, and persistent storage.
+
+1. **Push to GitHub** first
+2. Go to [railway.app](https://railway.app)
+3. Click "New Project" → "Deploy from GitHub repo"
+4. Select your repository
+5. Railway auto-detects and deploys!
+
+**Free tier**: 500 hours/month, $5 credit
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template)
+
+---
+
+### Option 2: Render
+
+Render also supports persistent disks for SQLite.
+
+1. Push to GitHub
+2. Go to [render.com](https://render.com)
+3. Click "New" → "Web Service"
+4. Connect your repo
+5. Settings will auto-configure from `render.yaml`
+
+**Free tier**: 750 hours/month (spins down after inactivity)
+
+---
+
+### Option 3: Docker (VPS/Self-hosted)
+
+```bash
+# Build the image
+docker build -t price-intelligence .
+
+# Run the container
+docker run -d \
+  --name price-app \
+  -p 3001:3001 \
+  -v price-data:/app/data \
+  price-intelligence
+
+# Access at http://your-server:3001
+```
+
+---
+
+### Option 4: Fly.io
+
+```bash
+# Install flyctl
+curl -L https://fly.io/install.sh | sh
+
+# Launch app
+fly launch
+
+# Deploy
+fly deploy
+```
+
+---
+
+### ❌ NOT Recommended: Vercel/Netlify
+
+These platforms **won't work** because:
+- No persistent filesystem (SQLite needs this)
+- Puppeteer is too heavy for serverless
+- Function timeouts (10-60s) too short for scraping
+
+---
+
+## 🔧 Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | 3001 | Server port |
+| `NODE_ENV` | development | Set to `production` for deployment |
 
 ## 📁 Project Structure
 
 ```
-MedicineCompare/
 ├── server/
-│   ├── index.js          # Express server setup
-│   ├── db.js             # SQLite database setup & seeding
-│   ├── scraper.js        # Puppeteer scraping logic
+│   ├── index.js          # Express server
+│   ├── db.js             # SQLite + seeding
+│   ├── scraper.js        # Puppeteer with stealth
 │   └── routes/
-│       ├── competitors.js # Competitor CRUD endpoints
-│       └── dashboard.js   # Dashboard & scraping endpoints
+│       ├── competitors.js
+│       └── dashboard.js
 ├── client/
 │   ├── src/
-│   │   ├── App.jsx       # Main app with routing
 │   │   ├── pages/
-│   │   │   ├── Dashboard.jsx    # Main dashboard
-│   │   │   └── ConfigPage.jsx   # Competitor config
+│   │   │   ├── Dashboard.jsx
+│   │   │   └── ConfigPage.jsx
 │   │   └── components/
 │   │       ├── ComparisonTable.jsx
 │   │       ├── PriceChart.jsx
 │   │       ├── AlertsList.jsx
-│   │       └── ActionsSuggested.jsx
-│   ├── index.html
-│   └── package.json
-├── data/                  # SQLite database (auto-created)
-├── package.json
-└── README.md
+│   │       ├── ManualPriceModal.jsx
+│   │       └── ScrapeLogsPanel.jsx
+│   └── ...
+├── data/                 # SQLite database (auto-created)
+├── Dockerfile            # Docker deployment
+├── railway.json          # Railway config
+├── render.yaml           # Render config
+└── Procfile              # Heroku/generic
 ```
 
-## 🔌 API Endpoints
+## 🏥 Pre-configured Competitors
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/competitors` | Get all competitors |
-| POST | `/api/competitors` | Add new competitor |
-| PUT | `/api/competitors/:id` | Update competitor |
-| DELETE | `/api/competitors/:id` | Delete competitor |
-| GET | `/api/dashboard` | Get dashboard data |
-| POST | `/api/scrape` | Trigger price scrape |
-| GET | `/api/price-history` | Get price history for charts |
-| PUT | `/api/alerts/:id/dismiss` | Dismiss an alert |
+The app comes with 5 real pharmacy sites:
 
-## 🗄️ Database Schema
+| Pharmacy | Scrape Likelihood | Notes |
+|----------|-------------------|-------|
+| Cost Plus Drugs | 🟢 High | Simple HTML |
+| Honeybee Health | 🟢 High | Simple site |
+| Blink Health | 🟡 Medium | React-based |
+| HealthWarehouse | 🟡 Medium | E-commerce |
+| RxSaver | 🟠 Low | Heavy JS |
 
-### competitors
-| Column | Type | Description |
-|--------|------|-------------|
-| id | INTEGER | Primary key |
-| name | TEXT | Competitor name |
-| product_url | TEXT | URL to scrape |
-| css_selector | TEXT | CSS selector for price |
-| internal_product | TEXT | Product category |
-| alert_threshold | REAL | Alert threshold % |
-| created_at | TIMESTAMP | Creation date |
+## 📝 Adding Your Own Competitors
 
-### price_history
-| Column | Type | Description |
-|--------|------|-------------|
-| id | INTEGER | Primary key |
-| competitor_id | INTEGER | Foreign key |
-| product_name | TEXT | Product name |
-| price | REAL | Scraped price |
-| scraped_at | TIMESTAMP | Scrape timestamp |
+1. Go to **Configuration** page
+2. Click **Add Competitor**
+3. Fill in:
+   - **Name**: e.g., "CVS Pharmacy"
+   - **URL**: Product page URL
+   - **CSS Selector**: Right-click price → Inspect → Copy selector
+   - **Product**: Map to your product category
+   - **Threshold**: Alert when price changes by this %
 
-### alerts
-| Column | Type | Description |
-|--------|------|-------------|
-| id | INTEGER | Primary key |
-| competitor_id | INTEGER | Foreign key |
-| product_name | TEXT | Product name |
-| old_price | REAL | Previous price |
-| new_price | REAL | New price |
-| percent_change | REAL | % change |
-| created_at | TIMESTAMP | Alert timestamp |
-| dismissed | BOOLEAN | Dismissed status |
+### Finding CSS Selectors
 
-## 🎨 UI/UX Features
+1. Open the competitor's product page
+2. Right-click the price → "Inspect"
+3. Look for the element containing the price
+4. Common patterns:
+   ```
+   .price
+   .product-price
+   [data-price]
+   span.amount
+   ```
 
-- **Responsive Design** - Works on desktop, tablet, and mobile
-- **Loading States** - Spinners and skeleton states
-- **Error Handling** - Clear error messages with recovery options
-- **Animations** - Smooth transitions and hover effects
-- **Modern Aesthetics** - Clean, professional blue/white theme
+## 🔄 When Scraping Fails
 
-## 🔧 Configuration Options
+Many sites block automated scraping. When this happens:
 
-### Environment Variables
-```bash
-PORT=3001          # Server port (default: 3001)
-NODE_ENV=production # Enable production mode
-```
-
-### Product Categories
-Edit the product options in `client/src/pages/ConfigPage.jsx`:
-```javascript
-const PRODUCT_OPTIONS = ['ED Medication', 'Hair Loss Treatment', 'Skin Care'];
-```
-
-### Our Prices
-Update our prices in the database or through the API:
-```javascript
-// In server/db.js during seeding
-insertOurPrice.run('ED Medication', 850);
-insertOurPrice.run('Hair Loss Treatment', 1200);
-insertOurPrice.run('Skin Care', 650);
-```
-
-## 📝 Seed Data
-
-The application comes pre-seeded with:
-
-**Competitors:**
-1. **MediStore** - ED Medication tracking
-   - URL: `https://example-medistore.com/ed-pack`
-   - Price trend: ₱850 → ₱799
-
-2. **PillExpress** - ED Medication tracking
-   - URL: `https://example-pillexpress.com/product/123`
-   - Price: ₱920 (stable)
-
-**Our Prices:**
-- ED Medication: ₱850
-- Hair Loss Treatment: ₱1,200
-- Skin Care: ₱650
-
-## 🧪 Demo Mode
-
-Since the example URLs don't exist, the scraper runs in "mock mode" by default:
-- Simulates realistic price changes (-5% to +5%)
-- Generates alerts when thresholds are exceeded
-- Perfect for testing and demonstration
-
-To enable real scraping, update competitor URLs to actual websites.
+1. **Check the error** in Scrape Logs
+2. **Try different selectors** - the site may have changed
+3. **Use Manual Entry** - add prices by hand
+4. **Use Demo mode** - for testing/demos
 
 ## 🛠️ Tech Stack
 
-**Backend:**
-- Node.js + Express
-- better-sqlite3
-- Puppeteer
-- CORS
+- **Backend**: Node.js, Express, better-sqlite3
+- **Scraping**: Puppeteer with stealth plugin
+- **Frontend**: React 18, Vite, TailwindCSS
+- **Charts**: Recharts
+- **Icons**: Lucide React
 
-**Frontend:**
-- React 18
-- Vite
-- TailwindCSS
-- Recharts
-- Lucide React Icons
-- Axios
-- React Router
+## 📄 API Endpoints
 
-## 📈 Future Enhancements
-
-- [ ] Scheduled automatic scraping (cron)
-- [ ] Email/SMS notifications
-- [ ] Export data to CSV/Excel
-- [ ] Multiple currency support
-- [ ] User authentication
-- [ ] Price prediction ML model
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/competitors` | List all competitors |
+| POST | `/api/competitors` | Add competitor |
+| PUT | `/api/competitors/:id` | Update competitor |
+| DELETE | `/api/competitors/:id` | Delete competitor |
+| POST | `/api/scrape` | Trigger scrape (all) |
+| POST | `/api/manual-price` | Add manual price |
+| GET | `/api/dashboard` | Dashboard data |
+| GET | `/api/scrape-logs` | View scrape history |
 
 ## 🐛 Troubleshooting
 
-**Database not created:**
-- Ensure the `data/` directory exists
-- Check write permissions
+**Scraping always fails?**
+- Try Demo mode first to verify the app works
+- Check if the site blocks bots (Cloudflare, etc.)
+- Use Manual Entry as fallback
 
-**Scraping fails:**
-- Verify CSS selectors using browser DevTools
-- Check if target site blocks scraping
-- Try increasing timeout values
+**Database errors?**
+- Delete `data/pricewatch.db` to reset
+- Restart server to re-seed
 
-**Frontend won't start:**
-- Run `cd client && npm install`
-- Ensure port 5173 is available
+**Port already in use?**
+```bash
+# Windows
+netstat -ano | findstr :3001
+taskkill /PID <PID> /F
 
-## 📄 License
+# Mac/Linux
+lsof -i :3001
+kill -9 <PID>
+```
 
-MIT License - feel free to use for your own projects!
+## 📜 License
+
+MIT License - Use freely for your projects!
 
 ---
 
 Built with ❤️ for competitive intelligence
-

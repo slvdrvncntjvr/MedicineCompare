@@ -4,9 +4,13 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: isProduction ? false : ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Request logging
@@ -22,7 +26,7 @@ const dashboardRouter = require('./routes/dashboard');
 // API Routes
 app.use('/api/competitors', competitorsRouter);
 app.use('/api/dashboard', dashboardRouter);
-app.use('/api', dashboardRouter); // Mount dashboard routes on /api as well for price-history
+app.use('/api', dashboardRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -30,11 +34,23 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
+
+if (isProduction) {
+  // Serve static files
+  app.use(express.static(clientDistPath));
   
+  // SPA fallback - serve index.html for all non-API routes
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+} else {
+  // Development - just show API info
+  app.get('/', (req, res) => {
+    res.json({ 
+      message: 'Price Intelligence API',
+      docs: 'Use the React frontend at http://localhost:5173'
+    });
   });
 }
 
@@ -45,13 +61,15 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
 ║   🏥 Price Intelligence Dashboard Server                   ║
 ║                                                            ║
 ║   Server running on: http://localhost:${PORT}               ║
+║   Environment: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}                            ║
+║                                                            ║
 ║   API Endpoints:                                           ║
 ║     - GET  /api/competitors                                ║
 ║     - POST /api/competitors                                ║
@@ -67,4 +85,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-
